@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8ED0F0">
+<title>Мила, Тёма и Бублик · Серия 1</title>
+</head>
+<body>
+<style>
+  /* ==========================================================================
+     "Мила, Тёма и Бублик" — развивающий мультик для малышей 2+
+     Пилотная серия 1: «Прогулка по солнечной полянке»
+     Всё нарисовано кодом (SVG), движения намеренно медленные и мягкие.
+     ========================================================================== */
+
+  :root{
+    color-scheme: light;
+    /* Небо и мир */
+    --sky-top:#8ED0F0; --sky-bot:#D6F1FF;
+    --sun:#FFD23F; --sun-soft:#FFF0A8;
+    --grass-top:#93DB6D; --grass-bot:#57B24A;
+    --grass-front:#4CA64C;
+    /* Герои / акценты */
+    --coral:#FF7A6B; --coral-deep:#F0604F;
+    --blue:#4FA3E3;
+    --skin:#FFE0BE; --skin-line:#E9B78C;
+    --ink:#5B4636;              /* мягкий коричневый контур/текст */
+    /* Учебные цвета */
+    --red:#EF473E; --yellow:#FFC61A; --bluef:#3B8DF0;
+    /* Интерфейс */
+    --cream:#FFF8EC; --cream-2:#FFEFD6;
+    --panel:#FFFBF3;
+    --shadow:0 10px 30px rgba(91,70,54,.18);
+    --font-round: "SF Pro Rounded","Nunito","Baloo 2","Varela Round","Comic Sans MS","Chalkboard SE",system-ui,-apple-system,"Segoe UI Rounded","Segoe UI",sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:var(--font-round);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #FFF7E6 0%, #FDEFD6 45%, #F7E3C2 100%);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  .app{
+    min-height:100dvh;
+    display:flex; flex-direction:column; align-items:center;
+    gap:clamp(8px,1.6vh,16px);
+    padding:clamp(10px,2vh,20px) clamp(10px,2vw,22px) clamp(14px,2.4vh,26px);
+  }
+
+  /* --------------------------- Верхняя панель --------------------------- */
+  .topbar{
+    width:100%; max-width:1180px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    justify-content:center; text-align:center;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+  }
+  .brand h1{
+    margin:0; font-size:clamp(20px,3.2vw,32px); font-weight:800;
+    letter-spacing:.01em; line-height:1;
+    color:var(--ink);
+  }
+  .brand .sub{
+    margin:2px 0 0; font-size:clamp(12px,1.7vw,15px); font-weight:600;
+    color:#8A6E56;
+  }
+  .badge{
+    display:inline-block; padding:6px 12px; border-radius:999px;
+    background:var(--coral); color:#fff; font-weight:800; font-size:13px;
+    letter-spacing:.06em; text-transform:uppercase; box-shadow:var(--shadow);
+  }
+  .age-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 12px; border-radius:999px; background:#fff; color:#8A6E56;
+    font-weight:700; font-size:13px; border:2px solid #F0DDBE;
+  }
+
+  /* ------------------------------ Сцена ------------------------------ */
+  .stage-wrap{
+    position:relative;
+    width:100%;
+    max-width:min(1180px, calc((100dvh - 260px) * 1.7778));
+    aspect-ratio:16/9;
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:var(--shadow), 0 2px 0 #fff inset;
+    background:linear-gradient(var(--sky-top),var(--sky-bot));
+    outline:6px solid #fff;
+  }
+  .stage{ display:block; width:100%; height:100%; }
+
+  /* Крупная подпись-«слово» внизу сцены */
+  .caption{
+    position:absolute; left:50%; bottom:3.4%; transform:translateX(-50%);
+    max-width:92%;
+    padding:.34em .9em; border-radius:999px;
+    background:rgba(255,251,243,.92);
+    box-shadow:0 8px 22px rgba(91,70,54,.22);
+    font-weight:800; color:var(--ink);
+    font-size:clamp(22px,4.6vw,46px);
+    line-height:1.05; white-space:nowrap; text-align:center;
+    opacity:0; transition:opacity .35s ease;
+    pointer-events:none;
+  }
+  .caption.in{ opacity:1; }
+
+  /* Стартовая заставка поверх сцены */
+  .start-overlay{
+    position:absolute; inset:0; z-index:5;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px; text-align:center; padding:24px;
+    background:radial-gradient(120% 120% at 50% 30%, rgba(255,247,225,.86), rgba(255,238,205,.92));
+    backdrop-filter:blur(2px);
+    border:none; font-family:inherit; color:var(--ink);
+    cursor:pointer;
+  }
+  .start-overlay .hello{
+    font-size:clamp(22px,4.4vw,40px); font-weight:800; margin:0;
+  }
+  .start-overlay .desc{
+    font-size:clamp(13px,2vw,18px); font-weight:600; max-width:32ch; color:#7A5F49; margin:0;
+  }
+  .play-btn{
+    display:inline-flex; align-items:center; gap:12px;
+    padding:16px 30px; border-radius:999px; border:none;
+    background:var(--coral); color:#fff; cursor:pointer;
+    font-family:inherit; font-weight:800; font-size:clamp(18px,2.6vw,24px);
+    box-shadow:0 12px 26px rgba(240,96,79,.38); transition:transform .15s ease, background .15s;
+  }
+  .play-btn .tri{ font-size:1.1em; line-height:0; }
+  .start-overlay:hover .play-btn{ transform:scale(1.05); background:var(--coral-deep); }
+  .sound-hint{ font-size:13px; font-weight:700; color:#9A7C63; display:flex; align-items:center; gap:6px; }
+
+  /* ---------------------------- Управление ---------------------------- */
+  .controls{
+    width:100%; max-width:1180px;
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+  }
+  .dots{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .dot{
+    width:12px; height:12px; border-radius:999px; background:#EAD6B6;
+    transition:all .3s ease;
+  }
+  .dot.on{ background:var(--coral); width:30px; }
+  .scene-label{ font-size:13px; font-weight:700; color:#9A7C63; min-width:88px; text-align:center; }
+
+  .btn-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    min-height:56px; padding:0 22px; border-radius:999px;
+    border:2px solid transparent; cursor:pointer;
+    font-family:inherit; font-weight:800; font-size:18px;
+    background:var(--panel); color:var(--ink);
+    box-shadow:0 6px 16px rgba(91,70,54,.14);
+    transition:transform .12s ease, background .15s, box-shadow .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn.primary{ background:var(--coral); color:#fff; box-shadow:0 8px 20px rgba(240,96,79,.34); }
+  .btn.ghost{ background:#fff; border-color:#F0DDBE; color:#8A6E56; }
+  .btn .ico{ font-size:20px; line-height:0; }
+  .btn:focus-visible{ outline:4px solid #FFC9A6; outline-offset:2px; }
+
+  /* --------------------------- Примечание --------------------------- */
+  .note{
+    width:100%; max-width:760px; text-align:center;
+    font-size:13px; line-height:1.5; color:#9A7C63; font-weight:600;
+  }
+  .note b{ color:#7A5F49; }
+
+  /* ======================================================================
+     SVG-анимации — все медленные, мягкие, зацикленные (никаких вспышек)
+     ====================================================================== */
+  .cloud-drift{ animation:drift 62s linear infinite; }
+  .cloud-drift.slow{ animation-duration:86s; }
+  .cloud-drift.slow2{ animation-duration:104s; }
+  @keyframes drift{ from{ transform:translateX(-260px);} to{ transform:translateX(1900px);} }
+
+  .sun-rays{ transform-box:fill-box; transform-origin:center; animation:spin 120s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .sun-core{ transform-box:fill-box; transform-origin:center; animation:breathe 6s ease-in-out infinite; }
+  @keyframes breathe{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.045);} }
+
+  .bob{ animation:bob 3.8s ease-in-out infinite; }
+  .bob.b2{ animation-duration:4.4s; animation-delay:-1.2s; }
+  .bob.b3{ animation-duration:3.2s; animation-delay:-.6s; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-9px);} }
+
+  .wave-arm{ transform-box:fill-box; transform-origin:50% 8%; animation:wave 2.8s ease-in-out infinite; }
+  @keyframes wave{ 0%,100%{ transform:rotate(-4deg);} 50%{ transform:rotate(14deg);} }
+
+  .tail{ transform-box:fill-box; transform-origin:12% 90%; animation:wag 1.1s ease-in-out infinite; }
+  @keyframes wag{ 0%,100%{ transform:rotate(-16deg);} 50%{ transform:rotate(16deg);} }
+
+  .sway{ transform-box:fill-box; transform-origin:50% 100%; animation:sway 5s ease-in-out infinite; }
+  .sway.s2{ animation-duration:6.2s; animation-delay:-1.5s; }
+  .sway.s3{ animation-duration:5.6s; animation-delay:-2.4s; }
+  @keyframes sway{ 0%,100%{ transform:rotate(-3deg);} 50%{ transform:rotate(3deg);} }
+
+  .bunny-bob{ animation:bunnyBob 2.6s ease-in-out infinite; }
+  @keyframes bunnyBob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-14px);} }
+
+  .flutter{ animation:flutter 12s ease-in-out infinite; }
+  @keyframes flutter{
+    0%{ transform:translate(0,0);} 25%{ transform:translate(60px,-30px);}
+    50%{ transform:translate(120px,10px);} 75%{ transform:translate(60px,-24px);}
+    100%{ transform:translate(0,0);}
+  }
+  .wing{ transform-box:fill-box; transform-origin:100% 50%; animation:wing .5s ease-in-out infinite; }
+  .wing.r{ transform-origin:0% 50%; }
+  @keyframes wing{ 0%,100%{ transform:scaleX(1);} 50%{ transform:scaleX(.55);} }
+
+  .bird-fly{ animation:drift 74s linear infinite; }
+  .bird-fly.b2{ animation-duration:92s; animation-delay:-30s; }
+
+  /* Появление/скрытие учебных предметов — плавно, без склеек */
+  .scene-prop{ opacity:0; visibility:hidden; transition:opacity 1s ease, transform 1s cubic-bezier(.34,1.4,.5,1); transform:scale(.55); transform-box:fill-box; transform-origin:center bottom; }
+  .scene-prop.show{ opacity:1; visibility:visible; transform:scale(1); }
+  .pop{ transform-origin:center center; }
+
+  .circle-hint{ stroke-dasharray:8 14; animation:dash 4s linear infinite; }
+  @keyframes dash{ to{ stroke-dashoffset:-220; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .cloud-drift,.sun-rays,.sun-core,.bob,.wave-arm,.tail,.sway,.bunny-bob,
+    .flutter,.wing,.bird-fly,.circle-hint{ animation:none !important; }
+  }
+
+  @media (max-width:520px){
+    .scene-label{ min-width:70px; }
+    .btn{ font-size:16px; padding:0 16px; min-height:52px; }
+    .caption{ font-size:clamp(19px,6.4vw,30px); }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <span class="badge">Пилот</span>
+    <div class="brand">
+      <div>
+        <h1>Мила, Тёма и Бублик</h1>
+        <p class="sub">Серия&nbsp;1 · Прогулка по солнечной полянке</p>
+      </div>
+    </div>
+    <span class="age-chip">🧸 для малышей 2+</span>
+  </header>
+
+  <main class="stage-wrap" id="stageWrap">
+    <svg class="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img"
+         aria-label="Полянка: девочка Мила, мальчик Тёма и щенок Бублик гуляют на солнце">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--sky-top)"/>
+          <stop offset="1" stop-color="var(--sky-bot)"/>
+        </linearGradient>
+        <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#A8E67F"/><stop offset="1" stop-color="#7FCB63"/>
+        </linearGradient>
+        <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--grass-top)"/><stop offset="1" stop-color="var(--grass-bot)"/>
+        </linearGradient>
+        <radialGradient id="sunG" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#FFF6C4"/><stop offset="55%" stop-color="var(--sun)"/>
+          <stop offset="100%" stop-color="#FFC021"/>
+        </radialGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#5B4636" flood-opacity="0.18"/>
+        </filter>
+      </defs>
+
+      <!-- Небо -->
+      <rect x="0" y="0" width="1600" height="900" fill="url(#sky)"/>
+
+      <!-- Солнце -->
+      <g transform="translate(1330,180)">
+        <g class="sun-rays">
+          <g fill="var(--sun-soft)" opacity="0.9">
+            <path d="M0,-150 L18,-95 L-18,-95 Z"/>
+            <path d="M0,150 L18,95 L-18,95 Z"/>
+            <path d="M-150,0 L-95,18 L-95,-18 Z"/>
+            <path d="M150,0 L95,18 L95,-18 Z"/>
+            <path d="M-106,-106 L-58,-90 L-90,-58 Z"/>
+            <path d="M106,106 L58,90 L90,58 Z"/>
+            <path d="M-106,106 L-90,58 L-58,90 Z"/>
+            <path d="M106,-106 L90,-58 L58,-90 Z"/>
+          </g>
+        </g>
+        <circle class="sun-core" r="82" fill="url(#sunG)"/>
+        <!-- добрая улыбка солнышка -->
+        <g class="sun-core" fill="none" stroke="#E88A00" stroke-width="5" stroke-linecap="round">
+          <circle cx="-28" cy="-8" r="6" fill="#E88A00" stroke="none"/>
+          <circle cx="28" cy="-8" r="6" fill="#E88A00" stroke="none"/>
+          <path d="M-26,26 Q0,48 26,26"/>
+        </g>
+      </g>
+
+      <!-- Птички (сцена 2) -->
+      <g id="pBirds" class="scene-prop" style="transform-origin:center;">
+        <g class="bird-fly">
+          <path d="M240,175 q22,-26 44,0 q22,-26 44,0" fill="none" stroke="#6E5A48" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <g class="bird-fly b2">
+          <path d="M470,120 q17,-20 34,0 q17,-20 34,0" fill="none" stroke="#6E5A48" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- Облака -->
+      <g fill="#FFFFFF" opacity="0.96">
+        <g transform="translate(0,140)"><g class="cloud-drift">
+          <ellipse cx="120" cy="0" rx="70" ry="46"/><ellipse cx="185" cy="12" rx="58" ry="40"/>
+          <ellipse cx="60" cy="16" rx="52" ry="36"/><rect x="55" y="14" width="180" height="40" rx="20"/>
+        </g></g>
+        <g transform="translate(0,250)"><g class="cloud-drift slow">
+          <ellipse cx="820" cy="0" rx="56" ry="38"/><ellipse cx="880" cy="10" rx="46" ry="32"/>
+          <ellipse cx="770" cy="12" rx="42" ry="30"/><rect x="765" y="10" width="150" height="34" rx="17"/>
+        </g></g>
+        <g transform="translate(0,90)"><g class="cloud-drift slow2">
+          <ellipse cx="1250" cy="0" rx="60" ry="40"/><ellipse cx="1315" cy="12" rx="50" ry="34"/>
+          <ellipse cx="1195" cy="14" rx="46" ry="32"/><rect x="1190" y="12" width="170" height="36" rx="18"/>
+        </g></g>
+      </g>
+
+      <!-- Холмы и земля -->
+      <path d="M0,600 Q400,536 820,584 Q1200,624 1600,576 L1600,900 L0,900 Z" fill="url(#hillBack)"/>
+      <path d="M0,700 Q450,662 900,700 Q1250,724 1600,690 L1600,900 L0,900 Z" fill="url(#hillFront)"/>
+      <path d="M0,806 Q520,782 1010,802 Q1320,816 1600,796 L1600,900 L0,900 Z" fill="#48A63F" opacity="0.92"/>
+
+      <!-- Дерево слева -->
+      <g transform="translate(190,760)" filter="url(#soft)">
+        <rect x="-22" y="-140" width="44" height="150" rx="18" fill="#9A6A3C"/>
+        <g class="sway">
+          <circle cx="0" cy="-210" r="96" fill="#6FBE4B"/>
+          <circle cx="-70" cy="-170" r="66" fill="#7CCB55"/>
+          <circle cx="70" cy="-172" r="66" fill="#63B143"/>
+          <circle cx="-30" cy="-250" r="60" fill="#82D25C"/>
+          <circle cx="42" cy="-240" r="54" fill="#72C34E"/>
+          <circle cx="-4" cy="-192" r="80" fill="#77C851"/>
+        </g>
+      </g>
+
+      <!-- маленькие травинки/кустики (декор) -->
+      <g stroke="#3F9A3C" stroke-width="7" stroke-linecap="round" opacity="0.9">
+        <g class="sway s2"><path d="M300,850 v-34 M312,850 v-46 M324,850 v-34"/></g>
+        <g class="sway s3"><path d="M1250,858 v-34 M1262,858 v-48 M1274,858 v-34"/></g>
+        <g class="sway"><path d="M150,872 v-30 M162,872 v-42 M174,872 v-30"/></g>
+      </g>
+
+      <!-- ================= ГЕРОИ ================= -->
+      <!-- Мила (девочка) -->
+      <g transform="translate(560,726)" filter="url(#soft)">
+        <g class="bob">
+          <!-- ноги -->
+          <rect x="-34" y="-70" width="24" height="66" rx="12" fill="var(--skin)"/>
+          <rect x="10" y="-70" width="24" height="66" rx="12" fill="var(--skin)"/>
+          <ellipse cx="-22" cy="-4" rx="24" ry="14" fill="var(--coral-deep)"/>
+          <ellipse cx="22" cy="-4" rx="24" ry="14" fill="var(--coral-deep)"/>
+          <!-- платье -->
+          <path d="M-40,-80 L40,-80 L64,-2 L-64,-2 Z" fill="var(--coral)"/>
+          <path d="M-40,-80 L40,-80 L46,-52 L-46,-52 Z" fill="var(--coral-deep)" opacity="0.5"/>
+          <!-- левая рука -->
+          <rect x="-70" y="-160" width="22" height="86" rx="11" fill="var(--skin)"/>
+          <!-- правая рука машет -->
+          <g class="wave-arm">
+            <rect x="48" y="-168" width="22" height="90" rx="11" fill="var(--skin)"/>
+            <circle cx="59" cy="-172" r="15" fill="var(--skin)"/>
+          </g>
+          <!-- голова -->
+          <circle cx="0" cy="-208" r="54" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/>
+          <!-- волосы + пучки -->
+          <path d="M-56,-214 Q0,-286 56,-214 Q40,-244 0,-248 Q-40,-244 -56,-214 Z" fill="#7A4B2B"/>
+          <circle cx="-52" cy="-224" r="24" fill="#7A4B2B"/>
+          <circle cx="52" cy="-224" r="24" fill="#7A4B2B"/>
+          <circle cx="-52" cy="-224" r="9" fill="var(--coral)"/>
+          <circle cx="52" cy="-224" r="9" fill="var(--coral)"/>
+          <!-- лицо -->
+          <circle cx="-19" cy="-208" r="7.5" fill="#3A2A1E"/>
+          <circle cx="19" cy="-208" r="7.5" fill="#3A2A1E"/>
+          <circle cx="-16.5" cy="-211" r="2.6" fill="#fff"/>
+          <circle cx="21.5" cy="-211" r="2.6" fill="#fff"/>
+          <circle cx="-30" cy="-190" r="9" fill="#FF9E9E" opacity="0.7"/>
+          <circle cx="30" cy="-190" r="9" fill="#FF9E9E" opacity="0.7"/>
+          <path d="M-13,-188 Q0,-176 13,-188" fill="none" stroke="#3A2A1E" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- Тёма (мальчик) -->
+      <g transform="translate(770,734)" filter="url(#soft)">
+        <g class="bob b2">
+          <rect x="-32" y="-66" width="24" height="62" rx="12" fill="var(--skin)"/>
+          <rect x="8" y="-66" width="24" height="62" rx="12" fill="var(--skin)"/>
+          <ellipse cx="-20" cy="-4" rx="24" ry="14" fill="#3E5D8A"/>
+          <ellipse cx="20" cy="-4" rx="24" ry="14" fill="#3E5D8A"/>
+          <!-- шорты -->
+          <path d="M-38,-92 L38,-92 L40,-56 L-40,-56 Z" fill="#8A5A34"/>
+          <!-- футболка -->
+          <path d="M-40,-166 L40,-166 L46,-88 L-46,-88 Z" fill="var(--blue)"/>
+          <path d="M-40,-166 L40,-166 L44,-140 L-44,-140 Z" fill="#3E8BCF" opacity="0.6"/>
+          <!-- руки -->
+          <g class="wave-arm">
+            <rect x="-70" y="-160" width="22" height="88" rx="11" fill="var(--skin)"/>
+            <circle cx="-59" cy="-164" r="15" fill="var(--skin)"/>
+          </g>
+          <rect x="48" y="-158" width="22" height="86" rx="11" fill="var(--skin)"/>
+          <!-- голова -->
+          <circle cx="0" cy="-204" r="53" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/>
+          <path d="M-54,-214 Q0,-276 54,-214 Q54,-244 0,-250 Q-54,-244 -54,-214 Z" fill="#4A2F1C"/>
+          <path d="M-54,-210 Q-40,-224 -20,-218" fill="none" stroke="#4A2F1C" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="-18" cy="-204" r="7.5" fill="#3A2A1E"/>
+          <circle cx="18" cy="-204" r="7.5" fill="#3A2A1E"/>
+          <circle cx="-15.5" cy="-207" r="2.6" fill="#fff"/>
+          <circle cx="20.5" cy="-207" r="2.6" fill="#fff"/>
+          <circle cx="-29" cy="-186" r="9" fill="#FF9E9E" opacity="0.7"/>
+          <circle cx="29" cy="-186" r="9" fill="#FF9E9E" opacity="0.7"/>
+          <path d="M-13,-184 Q0,-172 13,-184" fill="none" stroke="#3A2A1E" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- Бублик (щенок) -->
+      <g transform="translate(940,754)" filter="url(#soft)">
+        <g class="bob b3">
+          <!-- хвост -->
+          <g class="tail"><path d="M-58,-52 q-40,-6 -54,-40 q26,10 40,4 q10,16 22,20 Z" fill="#E7B276"/></g>
+          <!-- тело -->
+          <ellipse cx="0" cy="-40" rx="58" ry="42" fill="#EEBE82"/>
+          <!-- лапки -->
+          <ellipse cx="-30" cy="-6" rx="16" ry="12" fill="#E7B276"/>
+          <ellipse cx="30" cy="-6" rx="16" ry="12" fill="#E7B276"/>
+          <!-- голова -->
+          <circle cx="10" cy="-92" r="46" fill="#F1C88E"/>
+          <!-- уши -->
+          <path d="M-24,-104 q-34,-6 -34,44 q26,-2 40,-18 Z" fill="#B67C42"/>
+          <path d="M44,-104 q34,-6 34,44 q-26,-2 -40,-18 Z" fill="#B67C42"/>
+          <!-- мордочка -->
+          <ellipse cx="14" cy="-74" rx="26" ry="20" fill="#FFF0DA"/>
+          <circle cx="-4" cy="-100" r="7" fill="#3A2A1E"/>
+          <circle cx="26" cy="-100" r="7" fill="#3A2A1E"/>
+          <circle cx="-2" cy="-102.5" r="2.4" fill="#fff"/>
+          <circle cx="28" cy="-102.5" r="2.4" fill="#fff"/>
+          <ellipse cx="12" cy="-82" rx="9" ry="7" fill="#5B4636"/>
+          <path d="M12,-74 q-10,10 -20,4 M12,-74 q10,10 20,4" fill="none" stroke="#5B4636" stroke-width="3" stroke-linecap="round"/>
+          <path d="M8,-66 q6,10 14,2" fill="#F58C8C"/>
+        </g>
+      </g>
+
+      <!-- ================= УЧЕБНЫЕ ПРЕДМЕТЫ ================= -->
+      <!-- Цветы (сцены 3–5) -->
+      <g id="pRed" class="scene-prop" style="transition-delay:0s">
+        <g transform="translate(1120,726)"><g class="sway">
+          <path d="M0,0 V-118" stroke="var(--grass-front)" stroke-width="11" stroke-linecap="round"/>
+          <ellipse cx="20" cy="-56" rx="22" ry="12" fill="#57B24A" transform="rotate(28 20 -56)"/>
+          <g transform="translate(0,-140)">
+            <g fill="var(--red)">
+              <ellipse cx="0" cy="-30" rx="17" ry="27"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(144)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(288)"/>
+            </g>
+            <circle r="18" fill="var(--yellow)"/>
+          </g>
+        </g></g>
+      </g>
+      <g id="pYellow" class="scene-prop" style="transition-delay:.45s">
+        <g transform="translate(1290,726)"><g class="sway s2">
+          <path d="M0,0 V-126" stroke="var(--grass-front)" stroke-width="11" stroke-linecap="round"/>
+          <ellipse cx="-20" cy="-64" rx="22" ry="12" fill="#57B24A" transform="rotate(-28 -20 -64)"/>
+          <g transform="translate(0,-148)">
+            <g fill="var(--yellow)">
+              <ellipse cx="0" cy="-30" rx="17" ry="27"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(144)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(288)"/>
+            </g>
+            <circle r="18" fill="#E88A00"/>
+          </g>
+        </g></g>
+      </g>
+      <g id="pBlue" class="scene-prop" style="transition-delay:.9s">
+        <g transform="translate(1450,726)"><g class="sway s3">
+          <path d="M0,0 V-112" stroke="var(--grass-front)" stroke-width="11" stroke-linecap="round"/>
+          <ellipse cx="20" cy="-52" rx="22" ry="12" fill="#57B24A" transform="rotate(28 20 -52)"/>
+          <g transform="translate(0,-134)">
+            <g fill="var(--bluef)">
+              <ellipse cx="0" cy="-30" rx="17" ry="27"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(144)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-30" rx="17" ry="27" transform="rotate(288)"/>
+            </g>
+            <circle r="18" fill="var(--yellow)"/>
+          </g>
+        </g></g>
+      </g>
+
+      <!-- Цифры 1·2·3 (сцена 4) -->
+      <g id="pNum1" class="scene-prop">
+        <g transform="translate(1120,560)" class="pop">
+          <circle r="46" fill="#fff" opacity=".9"/>
+          <text x="0" y="20" text-anchor="middle" font-family="var(--font-round)" font-weight="800" font-size="66" fill="var(--red)">1</text>
+        </g>
+      </g>
+      <g id="pNum2" class="scene-prop">
+        <g transform="translate(1290,548)" class="pop">
+          <circle r="46" fill="#fff" opacity=".9"/>
+          <text x="0" y="20" text-anchor="middle" font-family="var(--font-round)" font-weight="800" font-size="66" fill="#E88A00">2</text>
+        </g>
+      </g>
+      <g id="pNum3" class="scene-prop">
+        <g transform="translate(1450,566)" class="pop">
+          <circle r="46" fill="#fff" opacity=".9"/>
+          <text x="0" y="20" text-anchor="middle" font-family="var(--font-round)" font-weight="800" font-size="66" fill="var(--bluef)">3</text>
+        </g>
+      </g>
+
+      <!-- Зайчик (сцена 5) -->
+      <g id="pBunny" class="scene-prop">
+        <g transform="translate(1360,752)" filter="url(#soft)"><g class="bunny-bob">
+          <!-- уши -->
+          <path d="M-16,-118 q-10,-70 8,-104 q22,26 12,96 Z" fill="#EFEFF6"/>
+          <path d="M16,-118 q10,-70 -8,-104 q-22,26 -12,96 Z" fill="#EFEFF6"/>
+          <path d="M-11,-124 q-6,-52 4,-78 q10,26 4,72 Z" fill="#FFC7D2"/>
+          <path d="M11,-124 q6,-52 -4,-78 q-10,26 -4,72 Z" fill="#FFC7D2"/>
+          <!-- тело -->
+          <ellipse cx="0" cy="-26" rx="46" ry="38" fill="#F4F4FA"/>
+          <ellipse cx="-24" cy="2" rx="16" ry="11" fill="#EAEAF2"/>
+          <ellipse cx="24" cy="2" rx="16" ry="11" fill="#EAEAF2"/>
+          <!-- голова -->
+          <circle cx="0" cy="-84" r="40" fill="#F7F7FC"/>
+          <circle cx="-15" cy="-88" r="6.5" fill="#3A2A1E"/>
+          <circle cx="15" cy="-88" r="6.5" fill="#3A2A1E"/>
+          <circle cx="-13" cy="-90.5" r="2.2" fill="#fff"/>
+          <circle cx="17" cy="-90.5" r="2.2" fill="#fff"/>
+          <circle cx="-22" cy="-74" r="7" fill="#FFC7D2" opacity=".8"/>
+          <circle cx="22" cy="-74" r="7" fill="#FFC7D2" opacity=".8"/>
+          <path d="M0,-74 l-5,6 h10 Z" fill="#FF8FA3"/>
+          <path d="M0,-68 q-8,8 -16,4 M0,-68 q8,8 16,4" fill="none" stroke="#B9A9C9" stroke-width="2.5" stroke-linecap="round"/>
+        </g></g>
+      </g>
+
+      <!-- Буква А + арбуз (сцены 6–7) -->
+      <g id="pLetterA" class="scene-prop">
+        <g transform="translate(1120,470)" class="pop">
+          <circle r="120" fill="#FFFFFF" opacity=".55"/>
+          <text x="0" y="58" text-anchor="middle" font-family="var(--font-round)" font-weight="800" font-size="210" fill="var(--coral)">А</text>
+        </g>
+      </g>
+      <g id="pArbuz" class="scene-prop">
+        <g transform="translate(1380,540)" class="pop">
+          <circle id="arbuzC" cx="0" cy="0" r="92" fill="#4FAE4A"/>
+          <path d="M-70,-56 Q0,-92 70,-56" fill="none" stroke="#2F7D33" stroke-width="14" stroke-linecap="round" opacity=".7"/>
+          <path d="M-88,-10 Q0,-40 88,-10" fill="none" stroke="#2F7D33" stroke-width="14" stroke-linecap="round" opacity=".7"/>
+          <path d="M-88,34 Q0,10 88,34" fill="none" stroke="#2F7D33" stroke-width="14" stroke-linecap="round" opacity=".7"/>
+          <path d="M-72,66 Q0,52 72,66" fill="none" stroke="#2F7D33" stroke-width="12" stroke-linecap="round" opacity=".7"/>
+          <ellipse cx="-30" cy="-30" rx="16" ry="26" fill="#EAFBE0" opacity=".55" transform="rotate(-20 -30 -30)"/>
+        </g>
+      </g>
+
+      <!-- Обводка «круг» (сцена 7) -->
+      <g id="pCircle" class="scene-prop">
+        <circle class="circle-hint" cx="1380" cy="540" r="112" fill="none" stroke="var(--coral)" stroke-width="8"/>
+      </g>
+
+      <!-- Бабочка (всегда, мягко порхает) -->
+      <g transform="translate(360,560)"><g class="flutter">
+        <g transform="scale(.9)">
+          <g class="wing"><ellipse cx="-16" cy="0" rx="16" ry="22" fill="#FF9CC4"/><ellipse cx="-14" cy="18" rx="12" ry="16" fill="#FFB3D4"/></g>
+          <g class="wing r"><ellipse cx="16" cy="0" rx="16" ry="22" fill="#FF9CC4"/><ellipse cx="14" cy="18" rx="12" ry="16" fill="#FFB3D4"/></g>
+          <rect x="-3" y="-14" width="6" height="40" rx="3" fill="#5B4636"/>
+          <circle cx="0" cy="-16" r="6" fill="#5B4636"/>
+        </g>
+      </g></g>
+
+    </svg>
+
+    <div class="caption" id="caption"></div>
+
+    <button class="start-overlay" id="startBtn" aria-label="Начать мультик">
+      <p class="hello">Привет! Пойдём гулять? 🌼</p>
+      <p class="desc">Развивающий мультик для малышей. Мягкие плавные переходы, спокойные цвета, добрые герои.</p>
+      <span class="play-btn"><span class="tri">▶</span> Начать</span>
+      <span class="sound-hint">🔊 Смотрите со звуком — герои говорят и поют</span>
+    </button>
+  </main>
+
+  <nav class="controls" aria-label="Управление просмотром">
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="scene-label" id="sceneLabel">Сцена 1 / 8</div>
+    <div class="btn-row">
+      <button class="btn ghost" id="prevBtn" aria-label="Предыдущая сцена"><span class="ico">◀</span> Назад</button>
+      <button class="btn primary" id="playBtn" aria-label="Пауза или продолжить"><span class="ico" id="playIco">⏸</span> <span id="playTxt">Пауза</span></button>
+      <button class="btn ghost" id="nextBtn" aria-label="Следующая сцена">Дальше <span class="ico">▶</span></button>
+      <button class="btn ghost" id="soundBtn" aria-label="Включить или выключить звук"><span class="ico" id="soundIco">🔊</span> Звук</button>
+    </div>
+  </nav>
+
+  <p class="note">
+    Это <b>пилотная серия-демо</b>: короткая, чтобы показать стиль и мягкую подачу. В полной версии серии длиннее,
+    а героев и уроков больше. Всё нарисовано кодом (SVG) и озвучено синтезом речи — <b>лучше смотреть со звуком</b>.
+  </p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------- Данные серии ---------------------------- */
+  var scenes = [
+    { show:[], cap:"Привет!",
+      say:"Приве-ет! Меня зовут Мила. А меня — Тёма! А это наш весёлый щенок Бублик. Гав-гав! Сегодня мы идём гулять на солнечную полянку. Пойдём с нами!" },
+    { show:["pBirds"], cap:"Солнышко",
+      say:"Посмотри, какое чистое голубое небо. По небу летят птички. А высоко-высоко светит тёплое жёлтое солнышко. Скажи вместе со мной: сол-ныш-ко." },
+    { show:["pRed","pYellow","pBlue"], cap:'<span style="color:#E23B30">Красный</span> · <span style="color:#D79200">Жёлтый</span> · <span style="color:#2F7FE0">Синий</span>',
+      say:"Ой, смотри! На полянке расцвели красивые цветы. Этот цветок — красный. Этот цветок — жёлтый. А вот этот цветок — синий. Красный, жёлтый, синий!" },
+    { show:["pRed","pYellow","pBlue","pNum1","pNum2","pNum3"], cap:"1 · 2 · 3",
+      say:"Давай посчитаем наши цветочки. Один… два… три! У нас получилось три цветка. Раз, два, три. Молодец!" },
+    { show:["pRed","pYellow","pBlue","pBunny"], cap:"Заяц",
+      say:"Кто это скачет к нам по травке? Это зайчик! Заяц пушистый и любит прыгать: прыг-скок, прыг-скок. Давай поздороваемся: привет, зайка!" },
+    { show:["pLetterA","pArbuz"], cap:"Буква А",
+      say:"А теперь наша буква. Сегодня это буква А. А-а-а! С буквы А начинается вкусный арбуз. А-р-буз. Большой полосатый арбуз!" },
+    { show:["pLetterA","pArbuz","pCircle"], cap:"Круг",
+      say:"Посмотри на арбуз и на солнышко. Они круглые, как колёсико. Это фигура — круг. Кру-глый круг. Обведи круг пальчиком по экрану." },
+    { show:["pBunny"], cap:"До свидания!",
+      say:"Как же весело мы сегодня погуляли! Мы увидели цвета, посчитали до трёх, встретили зайчика и выучили букву А. Ты настоящий молодец! До свидания! До новых встреч на полянке!" }
+  ];
+
+  /* ------------------------------ Состояние ------------------------------ */
+  var idx = 0, playing = false, paused = false, soundOn = true, started = false;
+  var autoTimer = null, safetyTimer = null, capTimer = null;
+
+  var stageWrap = document.getElementById('stageWrap');
+  var capEl     = document.getElementById('caption');
+  var dotsWrap  = document.getElementById('dots');
+  var sceneLbl  = document.getElementById('sceneLabel');
+  var startBtn  = document.getElementById('startBtn');
+  var prevBtn   = document.getElementById('prevBtn');
+  var nextBtn   = document.getElementById('nextBtn');
+  var playBtn   = document.getElementById('playBtn');
+  var playIco   = document.getElementById('playIco');
+  var playTxt   = document.getElementById('playTxt');
+  var soundBtn  = document.getElementById('soundBtn');
+  var soundIco  = document.getElementById('soundIco');
+
+  /* Точки-индикаторы */
+  var dots = [];
+  for (var i=0;i<scenes.length;i++){
+    var d = document.createElement('span'); d.className='dot'; dotsWrap.appendChild(d); dots.push(d);
+  }
+
+  /* ------------------------------ Речь (TTS) ------------------------------ */
+  var synth = window.speechSynthesis || null;
+  var ruVoice = null;
+  function pickVoice(){
+    if(!synth) return;
+    var vs = synth.getVoices() || [];
+    ruVoice = vs.filter(function(v){ return /ru/i.test(v.lang); })[0] || null;
+  }
+  if (synth){ pickVoice(); try{ synth.onvoiceschanged = pickVoice; }catch(e){} }
+
+  function speak(text){
+    return new Promise(function(res){
+      if(!soundOn || !synth){ res('nospeech'); return; }
+      try{ synth.cancel(); }catch(e){}
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ru-RU'; if(ruVoice) u.voice = ruVoice;
+      u.rate = 0.92; u.pitch = 1.12; u.volume = 1;
+      u.onstart = function(){ duck(true); };
+      u.onend   = function(){ duck(false); res('end'); };
+      u.onerror = function(){ duck(false); res('err'); };
+      try{ synth.speak(u); }catch(e){ res('err'); }
+    });
+  }
+
+  /* --------------------------- Нежная музыка --------------------------- */
+  var actx=null, musicGain=null, musicFilter=null, musicTimer=null, noteI=0;
+  var melody=[261.63,329.63,392.00,440.00, 392.00,329.63,293.66,329.63,
+              261.63,329.63,392.00,523.25, 440.00,392.00,329.63,261.63];
+  function initAudio(){
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+      actx = new AC();
+      musicFilter = actx.createBiquadFilter(); musicFilter.type='lowpass'; musicFilter.frequency.value=1500;
+      musicGain = actx.createGain(); musicGain.gain.value = soundOn ? 0.05 : 0;
+      musicFilter.connect(musicGain); musicGain.connect(actx.destination);
+      if(actx.state==='suspended'){ actx.resume(); }
+      startMusicLoop();
+    }catch(e){}
+  }
+  function playNote(freq){
+    if(!actx || !soundOn) return;
+    var t = actx.currentTime;
+    var o = actx.createOscillator(); o.type='triangle'; o.frequency.value=freq;
+    var g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.5, t+0.08);
+    g.gain.exponentialRampToValueAtTime(0.0008, t+2.4);
+    o.connect(g); g.connect(musicFilter); o.start(t); o.stop(t+2.5);
+  }
+  function startMusicLoop(){
+    if(musicTimer) clearInterval(musicTimer);
+    musicTimer = setInterval(function(){ playNote(melody[noteI++ % melody.length]); }, 1800);
+  }
+  function duck(on){
+    if(!musicGain || !actx) return;
+    try{ musicGain.gain.setTargetAtTime(on ? 0.018 : (soundOn?0.05:0), actx.currentTime, 0.25); }catch(e){}
+  }
+
+  /* ------------------------------ Таймеры ------------------------------ */
+  function clearTimers(){
+    if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; }
+    if(safetyTimer){ clearTimeout(safetyTimer); safetyTimer=null; }
+  }
+
+  /* ------------------------- Отрисовка сцены ------------------------- */
+  function renderScene(i){
+    var sc = scenes[i];
+    var props = document.querySelectorAll('.scene-prop');
+    for (var k=0;k<props.length;k++){ props[k].classList.remove('show'); }
+    for (var j=0;j<sc.show.length;j++){
+      var el = document.getElementById(sc.show[j]); if(el) el.classList.add('show');
+    }
+    // плавная смена подписи
+    capEl.classList.remove('in');
+    if(capTimer) clearTimeout(capTimer);
+    capTimer = setTimeout(function(){ capEl.innerHTML = sc.cap; capEl.classList.add('in'); }, 260);
+    for (var m=0;m<dots.length;m++){ dots[m].classList.toggle('on', m===i); }
+    sceneLbl.textContent = 'Сцена ' + (i+1) + ' / ' + scenes.length;
+  }
+
+  function fallbackDur(text){
+    var words = text.split(/\s+/).length;
+    return Math.max(4200, words*470 + 1600);
+  }
+
+  function runScene(i){
+    clearTimers();
+    idx = i; renderScene(i);
+    if(paused) return;
+    var sc = scenes[i];
+    var advanced = false;
+    function advance(){
+      if(advanced || paused) return; advanced = true;
+      if(idx < scenes.length-1 && playing){
+        autoTimer = setTimeout(function(){ runScene(idx+1); }, 1700);
+      } else if (idx === scenes.length-1){
+        playing = false; setPlayUI();
+      }
+    }
+    if(soundOn && synth){
+      speak(sc.say).then(advance);
+      safetyTimer = setTimeout(advance, fallbackDur(sc.say) + 9000);
+    } else {
+      autoTimer = setTimeout(advance, fallbackDur(sc.say));
+    }
+  }
+
+  /* ------------------------------ UI-кнопки ------------------------------ */
+  function setPlayUI(){
+    var active = playing && !paused;
+    playIco.textContent = active ? '⏸' : '▶';
+    playTxt.textContent = active ? 'Пауза' : 'Играть';
+  }
+  function setSoundUI(){ soundIco.textContent = soundOn ? '🔊' : '🔇'; }
+
+  function start(){
+    if(started) return; started = true;
+    startBtn.style.display = 'none';
+    initAudio();
+    playing = true; paused = false; setPlayUI();
+    runScene(0);
+  }
+
+  startBtn.addEventListener('click', start);
+
+  prevBtn.addEventListener('click', function(){
+    if(!started){ start(); return; }
+    if(synth) try{ synth.cancel(); }catch(e){}
+    clearTimers(); playing = true; paused = false; setPlayUI();
+    runScene(Math.max(0, idx-1));
+  });
+  nextBtn.addEventListener('click', function(){
+    if(!started){ start(); return; }
+    if(synth) try{ synth.cancel(); }catch(e){}
+    clearTimers(); playing = true; paused = false; setPlayUI();
+    runScene(Math.min(scenes.length-1, idx+1));
+  });
+  playBtn.addEventListener('click', function(){
+    if(!started){ start(); return; }
+    if(paused){
+      paused = false; playing = true; setPlayUI(); runScene(idx);
+    } else {
+      paused = true; setPlayUI(); clearTimers();
+      if(synth) try{ synth.cancel(); }catch(e){}
+      duck(false);
+    }
+  });
+  soundBtn.addEventListener('click', function(){
+    soundOn = !soundOn; setSoundUI();
+    if(!soundOn){
+      if(synth) try{ synth.cancel(); }catch(e){}
+      if(musicGain && actx) musicGain.gain.setTargetAtTime(0, actx.currentTime, 0.1);
+    } else {
+      if(musicGain && actx) musicGain.gain.setTargetAtTime(0.05, actx.currentTime, 0.1);
+      if(started && !paused){ runScene(idx); } // повторить реплику текущей сцены
+    }
+  });
+
+  /* Клавиши для родителей: ← → пробел */
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'){ nextBtn.click(); }
+    else if(e.key==='ArrowLeft'){ prevBtn.click(); }
+    else if(e.code==='Space'){ e.preventDefault(); playBtn.click(); }
+  });
+
+  /* Первичная отрисовка (до старта) */
+  renderScene(0); setPlayUI(); setSoundUI();
+
+  /* Хук для превью/скриншотов без звука */
+  window.__preview = function(n){
+    started = true; startBtn.style.display='none';
+    playing = false; paused = true; clearTimers();
+    if(synth) try{ synth.cancel(); }catch(e){}
+    idx = Math.max(0, Math.min(scenes.length-1, n));
+    renderScene(idx);
+  };
+})();
+</script>
+</body>
+</html>
