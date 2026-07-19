@@ -169,6 +169,19 @@
   .btn .ico{ font-size:20px; line-height:0; }
   .btn:focus-visible{ outline:4px solid #FFC9A6; outline-offset:2px; }
 
+  .voice-row{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;
+    font-weight:700; color:#8A6E56; font-size:15px;
+  }
+  .voice-row .ico{ font-size:18px; }
+  .voice-row select{
+    font-family:inherit; font-weight:700; font-size:15px; color:var(--ink);
+    background:#fff; border:2px solid #F0DDBE; border-radius:999px;
+    padding:9px 16px; cursor:pointer; max-width:min(70vw,320px);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .voice-row select:focus-visible{ outline:4px solid #FFC9A6; outline-offset:2px; }
+
   /* --------------------------- Примечание --------------------------- */
   .note{
     width:100%; max-width:760px; text-align:center;
@@ -587,7 +600,7 @@
       <p class="hello">Привет! Пойдём гулять? 🌼</p>
       <p class="desc">Развивающий мультик для малышей. Мягкие плавные переходы, спокойные цвета, добрые герои.</p>
       <span class="play-btn"><span class="tri">▶</span> Начать</span>
-      <span class="sound-hint">🔊 Смотрите со звуком — герои говорят и поют</span>
+      <span class="sound-hint">🔊 Лучше со звуком. Голос можно выбрать внизу 🎙️</span>
     </button>
   </main>
 
@@ -600,11 +613,17 @@
       <button class="btn ghost" id="nextBtn" aria-label="Следующая сцена">Дальше <span class="ico">▶</span></button>
       <button class="btn ghost" id="soundBtn" aria-label="Включить или выключить звук"><span class="ico" id="soundIco">🔊</span> Звук</button>
     </div>
+    <div class="voice-row" id="voiceRow" style="display:none">
+      <span class="ico" aria-hidden="true">🎙️</span>
+      <label for="voiceSel">Голос:</label>
+      <select id="voiceSel" aria-label="Выбор голоса озвучки"></select>
+    </div>
   </nav>
 
   <p class="note">
     Это <b>пилотная серия-демо</b>: короткая, чтобы показать стиль и мягкую подачу. В полной версии серии длиннее,
-    а героев и уроков больше. Всё нарисовано кодом (SVG) и озвучено синтезом речи — <b>лучше смотреть со звуком</b>.
+    а героев и уроков больше. Всё нарисовано кодом (SVG). Озвучка — голосом устройства; внизу (🎙️) можно
+    выбрать <b>самый приятный голос</b> — в Chrome, на Android и iPhone обычно есть живые нейросетевые голоса.
   </p>
 </div>
 
@@ -615,21 +634,21 @@
   /* ---------------------------- Данные серии ---------------------------- */
   var scenes = [
     { show:[], cap:"Привет!",
-      say:"Приве-ет! Меня зовут Мила. А меня — Тёма! А это наш весёлый щенок Бублик. Гав-гав! Сегодня мы идём гулять на солнечную полянку. Пойдём с нами!" },
+      say:"Привет! Меня зовут Мила. А меня — Тёма. А это наш весёлый щенок Бублик. Гав-гав! Сегодня мы идём гулять на солнечную полянку. Пойдём с нами!" },
     { show:["pBirds"], cap:"Солнышко",
-      say:"Посмотри, какое чистое голубое небо. По небу летят птички. А высоко-высоко светит тёплое жёлтое солнышко. Скажи вместе со мной: сол-ныш-ко." },
+      say:"Посмотри, какое чистое голубое небо! По небу летят птички. А высоко в небе светит тёплое жёлтое солнышко." },
     { show:["pRed","pYellow","pBlue"], cap:'<span style="color:#E23B30">Красный</span> · <span style="color:#D79200">Жёлтый</span> · <span style="color:#2F7FE0">Синий</span>',
-      say:"Ой, смотри! На полянке расцвели красивые цветы. Этот цветок — красный. Этот цветок — жёлтый. А вот этот цветок — синий. Красный, жёлтый, синий!" },
+      say:"Ой, смотри! На полянке расцвели красивые цветы. Этот цветок красный. Этот цветок жёлтый. А этот цветок синий." },
     { show:["pRed","pYellow","pBlue","pNum1","pNum2","pNum3"], cap:"1 · 2 · 3",
-      say:"Давай посчитаем наши цветочки. Один… два… три! У нас получилось три цветка. Раз, два, три. Молодец!" },
+      say:"Давай посчитаем наши цветочки. Один. Два. Три! Получилось три цветка. Молодец!" },
     { show:["pRed","pYellow","pBlue","pBunny"], cap:"Заяц",
-      say:"Кто это скачет к нам по травке? Это зайчик! Заяц пушистый и любит прыгать: прыг-скок, прыг-скок. Давай поздороваемся: привет, зайка!" },
+      say:"Кто это скачет к нам по травке? Это зайчик! Он пушистый и любит прыгать: прыг-скок! Давай поздороваемся: привет, зайка!" },
     { show:["pLetterA","pArbuz"], cap:"Буква А",
-      say:"А теперь наша буква. Сегодня это буква А. А-а-а! С буквы А начинается вкусный арбуз. А-р-буз. Большой полосатый арбуз!" },
+      say:"А теперь наша буква. Сегодня это буква А. С буквы А начинается вкусный арбуз! Большой полосатый арбуз." },
     { show:["pLetterA","pArbuz","pCircle"], cap:"Круг",
-      say:"Посмотри на арбуз и на солнышко. Они круглые, как колёсико. Это фигура — круг. Кру-глый круг. Обведи круг пальчиком по экрану." },
+      say:"Посмотри на арбуз и на солнышко. Они круглые, как колесо. Это фигура круг. Найди пальчиком круг на экране!" },
     { show:["pBunny"], cap:"До свидания!",
-      say:"Как же весело мы сегодня погуляли! Мы увидели цвета, посчитали до трёх, встретили зайчика и выучили букву А. Ты настоящий молодец! До свидания! До новых встреч на полянке!" }
+      say:"Как же весело мы сегодня погуляли! Мы увидели цвета, посчитали до трёх, встретили зайчика и узнали букву А. Ты настоящий молодец! До свидания! До новых встреч!" }
   ];
 
   /* ------------------------------ Состояние ------------------------------ */
@@ -656,27 +675,97 @@
   }
 
   /* ------------------------------ Речь (TTS) ------------------------------ */
+  /* Web Speech API. Качество голосов сильно зависит от устройства, поэтому мы
+     не берём «первый попавшийся» русский голос (часто это роботизированный
+     eSpeak), а РАНЖИРУЕМ доступные и выбираем самый качественный —
+     нейросетевой. Родитель может переключить голос вручную и сразу услышать. */
   var synth = window.speechSynthesis || null;
-  var ruVoice = null;
-  function pickVoice(){
-    if(!synth) return;
-    var vs = synth.getVoices() || [];
-    ruVoice = vs.filter(function(v){ return /ru/i.test(v.lang); })[0] || null;
-  }
-  if (synth){ pickVoice(); try{ synth.onvoiceschanged = pickVoice; }catch(e){} }
+  var ruVoices = [], chosenVoice = null, speechSession = 0;
+  var VOICE_KEY = 'vse_voice_uri';
 
-  function speak(text){
-    return new Promise(function(res){
-      if(!soundOn || !synth){ res('nospeech'); return; }
-      try{ synth.cancel(); }catch(e){}
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ru-RU'; if(ruVoice) u.voice = ruVoice;
-      u.rate = 0.92; u.pitch = 1.12; u.volume = 1;
-      u.onstart = function(){ duck(true); };
-      u.onend   = function(){ duck(false); res('end'); };
-      u.onerror = function(){ duck(false); res('err'); };
-      try{ synth.speak(u); }catch(e){ res('err'); }
+  function scoreVoice(v){
+    var n = (v.name || '').toLowerCase();
+    var s = 0;
+    if (/natural|neural/.test(n))                        s += 70; // MS «Natural» / нейро
+    if (/svetlana|dariya|dmitry/.test(n))                s += 45; // MS русские нейро-голоса
+    if (/enhanced|premium|siri/.test(n))                 s += 45; // Apple улучшенные
+    if (/milena|katya|katerina|yuri/.test(n))            s += 30; // Apple русские
+    if (/google/.test(n))                                s += 30; // Google (Chrome/Android)
+    if (v.localService === false)                        s += 12; // сетевые обычно приятнее
+    if (/female|женск|ирина|irina|alyona|alena|alsu/.test(n)) s += 6;
+    if (/espeak|compact|pico/.test(n))                   s -= 60; // роботизированные — вниз
+    return s;
+  }
+  function loadVoices(){
+    if (!synth) return;
+    var all = synth.getVoices() || [];
+    var ru = all.filter(function(v){ return /^ru/i.test(v.lang); });
+    if (!ru.length) ru = all.filter(function(v){ return /ru/i.test(v.lang); });
+    ru.sort(function(a,b){ return scoreVoice(b) - scoreVoice(a); });
+    ruVoices = ru;
+    var saved = null; try { saved = localStorage.getItem(VOICE_KEY); } catch(e){}
+    chosenVoice = ru.filter(function(v){ return v.voiceURI === saved; })[0] || ru[0] || null;
+    buildVoiceMenu();
+  }
+  function prettyName(v){
+    var n = v.name.replace(/Microsoft|Online|\(Natural\)|Desktop|\(ru-RU\)/gi, '')
+                  .replace(/\s+/g, ' ').trim();
+    return (n || v.name) + (v.localService === false ? ' ✨' : '');
+  }
+  function buildVoiceMenu(){
+    var row = document.getElementById('voiceRow');
+    var sel = document.getElementById('voiceSel');
+    if (!row || !sel) return;
+    if (!ruVoices.length){ row.style.display = 'none'; return; }
+    sel.innerHTML = '';
+    ruVoices.forEach(function(v){
+      var o = document.createElement('option');
+      o.value = v.voiceURI; o.textContent = prettyName(v);
+      if (v === chosenVoice) o.selected = true;
+      sel.appendChild(o);
     });
+    row.style.display = ruVoices.length > 1 ? 'flex' : 'none';
+  }
+  if (synth){ loadVoices(); try{ synth.onvoiceschanged = loadVoices; }catch(e){} }
+
+  function stopSpeech(){
+    speechSession++;                          // текущую озвучку помечаем отменённой
+    if (synth) try{ synth.cancel(); }catch(e){}
+    duck(false);
+  }
+  function splitPhrases(t){
+    return t.replace(/([.!?…])\s+/g, '$1\n').split('\n')
+            .map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  /* Читает текст по предложениям с мягкими паузами — звучит живее «простыни». */
+  function speak(text){
+    return new Promise(function(resolve){
+      if (!soundOn || !synth){ resolve('nospeech'); return; }
+      try{ synth.cancel(); }catch(e){}
+      var my = ++speechSession;
+      var parts = splitPhrases(text), i = 0, opened = false;
+      function next(){
+        if (my !== speechSession){ resolve('cancelled'); return; }
+        if (i >= parts.length){ duck(false); resolve('end'); return; }
+        var u = new SpeechSynthesisUtterance(parts[i++]);
+        try { if (chosenVoice){ u.voice = chosenVoice; u.lang = chosenVoice.lang; } else u.lang = 'ru-RU'; }
+        catch(e){ u.lang = 'ru-RU'; }
+        u.rate = 0.9; u.pitch = 1.0; u.volume = 1;
+        u.onstart = function(){ if(!opened){ opened = true; duck(true); } };
+        u.onend   = function(){ setTimeout(next, 260); };  // спокойная пауза между фразами
+        u.onerror = function(){ setTimeout(next, 140); };
+        try{ synth.speak(u); }catch(e){ setTimeout(next, 140); }
+      }
+      next();
+    });
+  }
+  function sampleVoice(){
+    if (!soundOn || !synth) return;
+    stopSpeech();
+    var u = new SpeechSynthesisUtterance('Привет! Меня хорошо слышно?');
+    try { if (chosenVoice){ u.voice = chosenVoice; u.lang = chosenVoice.lang; } }catch(e){}
+    u.rate = 0.9; u.pitch = 1.0;
+    try{ synth.speak(u); }catch(e){}
   }
 
   /* --------------------------- Нежная музыка --------------------------- */
@@ -755,8 +844,8 @@
       }
     }
     if(soundOn && synth){
-      speak(sc.say).then(advance);
-      safetyTimer = setTimeout(advance, fallbackDur(sc.say) + 9000);
+      speak(sc.say).then(function(r){ if(r === 'end' || r === 'nospeech') advance(); });
+      safetyTimer = setTimeout(advance, fallbackDur(sc.say) + 12000);
     } else {
       autoTimer = setTimeout(advance, fallbackDur(sc.say));
     }
@@ -782,14 +871,12 @@
 
   prevBtn.addEventListener('click', function(){
     if(!started){ start(); return; }
-    if(synth) try{ synth.cancel(); }catch(e){}
-    clearTimers(); playing = true; paused = false; setPlayUI();
+    stopSpeech(); clearTimers(); playing = true; paused = false; setPlayUI();
     runScene(Math.max(0, idx-1));
   });
   nextBtn.addEventListener('click', function(){
     if(!started){ start(); return; }
-    if(synth) try{ synth.cancel(); }catch(e){}
-    clearTimers(); playing = true; paused = false; setPlayUI();
+    stopSpeech(); clearTimers(); playing = true; paused = false; setPlayUI();
     runScene(Math.min(scenes.length-1, idx+1));
   });
   playBtn.addEventListener('click', function(){
@@ -797,21 +884,31 @@
     if(paused){
       paused = false; playing = true; setPlayUI(); runScene(idx);
     } else {
-      paused = true; setPlayUI(); clearTimers();
-      if(synth) try{ synth.cancel(); }catch(e){}
-      duck(false);
+      paused = true; setPlayUI(); clearTimers(); stopSpeech();
     }
   });
   soundBtn.addEventListener('click', function(){
     soundOn = !soundOn; setSoundUI();
     if(!soundOn){
-      if(synth) try{ synth.cancel(); }catch(e){}
+      stopSpeech();
       if(musicGain && actx) musicGain.gain.setTargetAtTime(0, actx.currentTime, 0.1);
     } else {
       if(musicGain && actx) musicGain.gain.setTargetAtTime(0.05, actx.currentTime, 0.1);
       if(started && !paused){ runScene(idx); } // повторить реплику текущей сцены
     }
   });
+
+  /* Переключатель голоса: выбрать и сразу послушать образец */
+  var voiceSel = document.getElementById('voiceSel');
+  if (voiceSel){
+    voiceSel.addEventListener('change', function(){
+      chosenVoice = ruVoices.filter(function(v){ return v.voiceURI === voiceSel.value; })[0] || chosenVoice;
+      try{ localStorage.setItem(VOICE_KEY, chosenVoice ? chosenVoice.voiceURI : ''); }catch(e){}
+      clearTimers(); paused = true; setPlayUI();   // ставим на паузу, чтобы дать послушать
+      if(!started){ started = true; startBtn.style.display='none'; initAudio(); }
+      sampleVoice();
+    });
+  }
 
   /* Клавиши для родителей: ← → пробел */
   document.addEventListener('keydown', function(e){
@@ -826,8 +923,7 @@
   /* Хук для превью/скриншотов без звука */
   window.__preview = function(n){
     started = true; startBtn.style.display='none';
-    playing = false; paused = true; clearTimers();
-    if(synth) try{ synth.cancel(); }catch(e){}
+    playing = false; paused = true; clearTimers(); stopSpeech();
     idx = Math.max(0, Math.min(scenes.length-1, n));
     renderScene(idx);
   };
